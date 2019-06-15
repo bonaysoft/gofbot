@@ -12,3 +12,4 @@
 *.out
 build
 coverage.txt
+gofbot.lock

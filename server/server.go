@@ -2,8 +2,10 @@ package main
 
 import (
 	"bytes"
+	`context`
 	"encoding/json"
-	"fmt"
+	`fmt`
+	`io`
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -19,23 +21,52 @@ var tplArgExp = regexp.MustCompile(`{{(\s*\$\S+\s*)}}`)
 type Map map[string]interface{}
 
 type Server struct {
-	*gin.Engine
+	http.Server
+	robots map[string]*Robot
 }
 
-func New(robots []*Robot) (*Server, error) {
+func NewServer() *Server {
 	router := gin.Default()
-	for _, robot := range robots {
-		router.POST(fmt.Sprintf("/incoming/%s", robot.Alias), func(context *gin.Context) {
-			incomingHandler(context, robot)
-		})
+	server := &Server{
+		Server: http.Server{
+			Addr:    ":8080",
+			Handler: router,
+		},
+		robots: make(map[string]*Robot),
 	}
 
-	return &Server{
-		Engine: router,
-	}, nil
+	router.POST("/incoming/:alias", server.incomingHandler)
+	return server
 }
 
-func incomingHandler(ctx *gin.Context, robot *Robot) {
+func (s *Server) SetupRobots(robots []*Robot) {
+	for _, robot := range robots {
+		s.robots[robot.Alias] = robot
+	}
+}
+
+func (s *Server) Run(addr ...string) error {
+	if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Server) Shutdown() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	return s.Server.Shutdown(ctx)
+}
+
+func (s *Server) incomingHandler(ctx *gin.Context) {
+	alias := ctx.Param("alias")
+	robot, ok := s.robots[alias]
+	if !ok {
+		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("not found your robot"))
+		return
+	}
+
 	body, err := ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, err)
@@ -44,28 +75,35 @@ func incomingHandler(ctx *gin.Context, robot *Robot) {
 
 	params := make(Map)
 	if err := json.Unmarshal(body, &params); err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	msg, err := robot.MatchMessage(body)
+	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	for _, msg := range robot.Messages {
-		if !msg.Exp.Match(body) {
-			continue
-		}
-
-		// 正则替换参数
-		message := buildMessage(msg.Template, params)
-		body := buildPostBody(robot.BodyTpl, message)
-		http.DefaultClient.Timeout = 3 * time.Second
-		if resp, err := http.DefaultClient.Post(robot.WebHook, "application/json", body); err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, err)
-			return
-		} else {
-			defer resp.Body.Close()
-			rb, _ := ioutil.ReadAll(resp.Body)
-			ctx.Data(resp.StatusCode, resp.Header.Get("Content-Type"), rb)
-		}
+	msgStr := buildMessage(msg.Template, params) // 正则替换参数
+	postBody := buildPostBody(robot.BodyTpl, msgStr)
+	if err := forwardToRobot(ctx, robot.WebHook, postBody); err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
+}
+
+func forwardToRobot(ctx *gin.Context, url string, body io.Reader) error {
+	http.DefaultClient.Timeout = 3 * time.Second
+	resp, err := http.DefaultClient.Post(url, "application/json", body)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+	rb, _ := ioutil.ReadAll(resp.Body)
+	ctx.Data(resp.StatusCode, resp.Header.Get("Content-Type"), rb)
+	return nil
 }
 
 type variable struct {

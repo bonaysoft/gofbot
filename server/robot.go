@@ -13,6 +13,13 @@ import (
 	"strings"
 )
 
+type Message struct {
+	Regexp   string `yaml:"regexp"`
+	Template string `yaml:"template"`
+
+	Exp *regexp.Regexp
+}
+
 type Robot struct {
 	Name     string     `yaml:"name"`
 	Alias    string     `yaml:"uuid"`
@@ -21,11 +28,14 @@ type Robot struct {
 	Messages []*Message `yaml:"messages"`
 }
 
-type Message struct {
-	Regexp   string `yaml:"regexp"`
-	Template string `yaml:"template"`
+func (r *Robot) MatchMessage(body []byte) (*Message, error) {
+	for _, msg := range r.Messages {
+		if msg.Exp.Match(body) {
+			return msg, nil
+		}
+	}
 
-	Exp *regexp.Regexp
+	return nil, fmt.Errorf("not found any message")
 }
 
 func newRobot(yamlPath string) (*Robot, error) {
