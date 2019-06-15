@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"bytes"
@@ -22,7 +22,7 @@ type Server struct {
 }
 
 func New() (*Server, error) {
-	robot, err := newRobot("conf/conf.yaml")
+	robot, err := newRobot("robots/wxwork4gitlab.yaml")
 	if err != nil {
 		return nil, err
 	}
