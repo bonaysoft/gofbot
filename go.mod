@@ -1,4 +1,4 @@
-module github.com/saltbo/gofrobot
+module github.com/saltbo/gofbot
 
 require (
 	github.com/gin-gonic/gin v1.4.0
