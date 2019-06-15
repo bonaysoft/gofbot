@@ -30,7 +30,7 @@ build:
 	@${TARGET} -v
 
 test:
-	go test -coverprofile .coverprofile ./...
+	go test -coverprofile .coverprofile -covermode=atomic ./...
 	go tool cover --func=.coverprofile
 
 run: build
