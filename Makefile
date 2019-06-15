@@ -5,7 +5,7 @@ MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR := $(dir $(MKFILE_PATH))
 TARGET = ${MKFILE_DIR}build/gofrobot
 
-RELEASE?=0.2.1
+RELEASE?=$(shell git describe --tags)
 GIT_REPO_INFO=$(shell git config --get remote.origin.url)
 
 ifndef COMMIT
@@ -23,7 +23,7 @@ build:
 	cd ${MKFILE_DIR} &&  go build -v -ldflags "-s -w    \
 		-X main.repo=${GIT_REPO_INFO}					\
 		-X main.commit=${COMMIT}						\
-		-X main.release=${RELEASE}						\
+		-X main.version=${RELEASE}						\
 		-X 'main.buildTime=${BUILD_TIME}'				\
 		" -o ${TARGET} ${MKFILE_DIR}server
 	@echo "-------------- version detail ---------------"

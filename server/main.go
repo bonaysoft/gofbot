@@ -9,10 +9,10 @@ import (
 
 var (
 	showVer   bool
-	repo      = ""
-	commit    = ""
-	version   = "v0.0.0"
-	buildTime = ""
+	repo      string
+	commit    string
+	version   string
+	buildTime string
 )
 
 func init() {
