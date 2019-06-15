@@ -1,10 +1,10 @@
 package main
 
 import (
-	`flag`
-	`fmt`
+	"flag"
+	"fmt"
 	"log"
-	`os`
+	"os"
 )
 
 var (
@@ -26,10 +26,14 @@ func init() {
 }
 
 func main() {
-	s, err := New()
+	robots, err := loadRobots("robots")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Fatal(s.Run())
+	if s, err := New(robots); err != nil {
+		log.Fatal(err)
+	} else {
+		log.Fatal(s.Run(":9613"))
+	}
 }
