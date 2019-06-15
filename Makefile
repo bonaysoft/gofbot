@@ -33,6 +33,9 @@ test:
 	go test -coverprofile=coverage.txt -covermode=atomic ./...
 	go tool cover --func=coverage.txt
 
+covhtml:
+	go tool cover -html=coverage.txt
+
 run: build
 	${TARGET}
 

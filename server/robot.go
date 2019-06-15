@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
+	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -32,7 +35,7 @@ func newRobot(yamlPath string) (*Robot, error) {
 	}
 
 	robot := new(Robot)
-	if err := yaml.UnmarshalStrict(yamlFile, robot); err != nil {
+	if err := yaml.Unmarshal(yamlFile, robot); err != nil {
 		return nil, err
 	}
 
@@ -54,4 +57,41 @@ func newRobot(yamlPath string) (*Robot, error) {
 	}
 
 	return robot, nil
+}
+
+func findRobots(root string, creator func(filepath string) error) error {
+	return filepath.Walk(root, func(filepath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		} else if info.IsDir() {
+			return nil
+		} else if path.Ext(filepath) != ".yaml" && path.Ext(filepath) != ".yml" {
+			return nil
+		}
+
+		return creator(filepath)
+	})
+}
+
+func loadRobots(robotsPath string) ([]*Robot, error) {
+	robots := make([]*Robot, 0)
+	robotCreator := func(filepath string) error {
+		robot, err := newRobot(filepath)
+		if err != nil {
+			return err
+		}
+
+		robots = append(robots, robot)
+		return nil
+	}
+
+	if err := findRobots(robotsPath, robotCreator); err != nil {
+		return nil, err
+	}
+
+	if len(robots) == 0 {
+		return nil, fmt.Errorf("not found any robot.")
+	}
+
+	return robots, nil
 }
