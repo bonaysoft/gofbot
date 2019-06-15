@@ -30,8 +30,8 @@ build:
 	@${TARGET} -v
 
 test:
-	go test -coverprofile .coverprofile -covermode=atomic ./...
-	go tool cover --func=.coverprofile
+	go test -coverprofile=coverage.txt -covermode=atomic ./...
+	go tool cover --func=coverage.txt
 
 run: build
 	${TARGET}
