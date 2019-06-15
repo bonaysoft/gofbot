@@ -2,10 +2,10 @@ package main
 
 import (
 	"bytes"
-	`context`
+	"context"
 	"encoding/json"
-	`fmt`
-	`io`
+	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -22,6 +22,7 @@ type Map map[string]interface{}
 
 type Server struct {
 	http.Server
+	router *gin.Engine
 	robots map[string]*Robot
 }
 
@@ -32,6 +33,7 @@ func NewServer() *Server {
 			Addr:    ":8080",
 			Handler: router,
 		},
+		router: router,
 		robots: make(map[string]*Robot),
 	}
 

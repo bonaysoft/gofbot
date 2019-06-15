@@ -60,15 +60,15 @@ func TestServer_Run(t *testing.T) {
 	robots, err := loadRobots("../robots")
 	assert.NoError(t, err)
 
-	r, e := New(robots)
-	assert.NoError(t, e)
+	server := NewServer()
+	server.SetupRobots(robots)
 	for _, robot := range robots {
 		// reset the hook to the test server URL
 		robot.WebHook = ts.URL
 
 		// RUN
 		body := bytes.NewBufferString(`{"name": "saltbo", "sex": "man", "info":{"city": "beijing"}}`)
-		w := performRequest(r, "POST", fmt.Sprintf("/incoming/%s", robot.Alias), body)
+		w := performRequest(server.router, "POST", fmt.Sprintf("/incoming/%s", robot.Alias), body)
 
 		// TEST
 		assert.Equal(t, http.StatusOK, w.Code)
