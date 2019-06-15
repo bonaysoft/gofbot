@@ -3,7 +3,7 @@
 BUILD_TIME := $(shell date "+%F %T")
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR := $(dir $(MKFILE_PATH))
-TARGET = ${MKFILE_DIR}build/gofrobot
+TARGET = ${MKFILE_DIR}build/gofbot
 
 RELEASE?=$(shell git describe --tags)
 GIT_REPO_INFO=$(shell git config --get remote.origin.url)
