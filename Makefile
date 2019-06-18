@@ -20,11 +20,11 @@ mod:
 
 build:
 	@echo "-------------- building the program ---------------"
-	cd ${MKFILE_DIR} &&  go build -v -ldflags "-s -w    \
-		-X main.repo=${GIT_REPO_INFO}					\
-		-X main.commit=${COMMIT}						\
-		-X main.version=${RELEASE}						\
-		-X 'main.buildTime=${BUILD_TIME}'				\
+	cd ${MKFILE_DIR} &&  go build -v -ldflags "-s -w \
+		-X main.repo=${GIT_REPO_INFO} \
+		-X main.commit=${COMMIT} \
+		-X main.version=${RELEASE} \
+		-X 'main.buildTime=${BUILD_TIME}' \
 		" -o ${TARGET} ${MKFILE_DIR}server
 	@echo "-------------- version detail ---------------"
 	@${TARGET} -v
