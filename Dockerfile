@@ -1,6 +1,5 @@
 FROM golang:latest AS build-env
 
-ENV GOPROXY https://goproxy.io
 ENV APP_HOME /app
 WORKDIR $APP_HOME
 
@@ -17,7 +16,7 @@ FROM debian:9
 ENV APP_HOME /app
 WORKDIR $APP_HOME
 
-ADD robots $APP_HOME/robots
+ADD deployments $APP_HOME/deployments
 COPY --from=build-env /app/build/gofbot $APP_HOME/gofbot
 
 ENTRYPOINT ["./gofbot"]
