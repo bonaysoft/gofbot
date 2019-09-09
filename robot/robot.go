@@ -1,4 +1,4 @@
-package main
+package robot
 
 import (
 	"crypto/md5"
@@ -13,11 +13,41 @@ import (
 	"strings"
 )
 
-type Message struct {
-	Regexp   string `yaml:"regexp"`
-	Template string `yaml:"template"`
+func LoadAndParse(robotsPath string) ([]*Robot, error) {
+	robots := make([]*Robot, 0)
+	robotCreator := func(filepath string) error {
+		robot, err := newRobot(filepath)
+		if err != nil {
+			return err
+		}
 
-	Exp *regexp.Regexp
+		robots = append(robots, robot)
+		return nil
+	}
+
+	if err := findRobots(robotsPath, robotCreator); err != nil {
+		return nil, err
+	}
+
+	if len(robots) == 0 {
+		return nil, fmt.Errorf("not found any robot.")
+	}
+
+	return robots, nil
+}
+
+func findRobots(root string, creator func(filepath string) error) error {
+	return filepath.Walk(root, func(filepath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		} else if info.IsDir() {
+			return nil
+		} else if path.Ext(filepath) != ".yaml" && path.Ext(filepath) != ".yml" {
+			return nil
+		}
+
+		return creator(filepath)
+	})
 }
 
 type Robot struct {
@@ -53,9 +83,9 @@ func newRobot(yamlPath string) (*Robot, error) {
 	robot.Alias = hex.EncodeToString(nameHash[:])
 	errors := make([]string, 0)
 	for _, msg := range robot.Messages {
-		exp, err2 := regexp.Compile(msg.Regexp)
+		exp, err := regexp.Compile(msg.Regexp)
 		if err != nil {
-			errors = append(errors, err2.Error())
+			errors = append(errors, err.Error())
 			continue
 		}
 
@@ -67,41 +97,4 @@ func newRobot(yamlPath string) (*Robot, error) {
 	}
 
 	return robot, nil
-}
-
-func findRobots(root string, creator func(filepath string) error) error {
-	return filepath.Walk(root, func(filepath string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		} else if info.IsDir() {
-			return nil
-		} else if path.Ext(filepath) != ".yaml" && path.Ext(filepath) != ".yml" {
-			return nil
-		}
-
-		return creator(filepath)
-	})
-}
-
-func loadRobots(robotsPath string) ([]*Robot, error) {
-	robots := make([]*Robot, 0)
-	robotCreator := func(filepath string) error {
-		robot, err := newRobot(filepath)
-		if err != nil {
-			return err
-		}
-
-		robots = append(robots, robot)
-		return nil
-	}
-
-	if err := findRobots(robotsPath, robotCreator); err != nil {
-		return nil, err
-	}
-
-	if len(robots) == 0 {
-		return nil, fmt.Errorf("not found any robot.")
-	}
-
-	return robots, nil
 }

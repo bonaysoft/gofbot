@@ -1,0 +1,12 @@
+name: wxwork4gitlab
+webhook: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=0d3ffb7e-3a7a-4f4c-8385-bea0db5e581a
+bodytpl: '{"msgtype":"markdown","markdown":{"content":"$template"}}'
+messages:
+  - regexp: push # regexp for match this message.
+    template: <font color=\"info\">{{ $project.name }}</font> 有新的PUSH，请相关同事注意。\n
+      >Commit:<font color=\"comment\"> {{ $project.id }}</font> \n
+      >Author:<font color=\"comment\"> {{ $user_name }}（{{ $user_email }}）</font> \n
+  - regexp: merge
+    template: test merge message.
+  - regexp: issue
+    template: test push message.
