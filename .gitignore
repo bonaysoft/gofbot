@@ -12,3 +12,8 @@
 *.out
 build
 coverage.txt
+
+# Project
+robots/*.yml
+robots/*.yaml
+!robots/example.yaml

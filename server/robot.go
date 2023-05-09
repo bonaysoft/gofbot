@@ -4,13 +4,14 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Robot struct {
@@ -41,6 +42,7 @@ func newRobot(yamlPath string) (*Robot, error) {
 
 	nameHash := md5.Sum([]byte(robot.Name))
 	robot.Alias = hex.EncodeToString(nameHash[:])
+	fmt.Printf("%s => %s\n", robot.Name, robot.Alias)
 	errors := make([]string, 0)
 	for _, msg := range robot.Messages {
 		exp, err2 := regexp.Compile(msg.Regexp)

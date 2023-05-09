@@ -1,5 +1,5 @@
 name: wxwork4gitlab
-webhook: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=0d3ffb7e-3a7a-4f4c-8385-bea0db5e581a
+webhook: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=0d3ffb7e-xxxx-xxxx-xxxx-bea0db5e581a
 bodytpl: '{"msgtype":"markdown","markdown":{"content":"$template"}}'
 messages:
   - regexp: name # regexp for match this message.

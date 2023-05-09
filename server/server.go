@@ -23,11 +23,15 @@ type Server struct {
 }
 
 func New(robots []*Robot) (*Server, error) {
+	buildHandler := func(robot Robot) gin.HandlerFunc {
+		return func(c *gin.Context) {
+			incomingHandler(c, &robot)
+		}
+	}
+
 	router := gin.Default()
 	for _, robot := range robots {
-		router.POST(fmt.Sprintf("/incoming/%s", robot.Alias), func(context *gin.Context) {
-			incomingHandler(context, robot)
-		})
+		router.POST(fmt.Sprintf("/incoming/%s", robot.Alias), buildHandler(*robot))
 	}
 
 	return &Server{
@@ -106,7 +110,7 @@ func extractArgs(params Map, key string) string {
 			return ""
 		}
 
-		if nextParams, ok := params[k].(Map); ok {
+		if nextParams, ok := params[k].(map[string]interface{}); ok {
 			params = nextParams
 		}
 	}
