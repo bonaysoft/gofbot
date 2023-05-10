@@ -10,7 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: saltbo/actions/release-image@master
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Image build and release
+        uses: saltbo/actions/release-image@master
         with:
           project-name: gofbot
           language: golang

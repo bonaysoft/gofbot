@@ -29,11 +29,11 @@ build:
 	@${TARGET} -v
 
 test:
-	go test -coverprofile=coverage.txt -covermode=atomic ./...
-	go tool cover --func=coverage.txt
+	go test -coverprofile=.coverprofile -covermode=atomic ./...
+	go tool cover --func=.coverprofile
 
 covhtml:
-	go tool cover -html=coverage.txt
+	go tool cover -html=.coverprofile
 
 run: build
 	${TARGET}
