@@ -12,7 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: saltbo/actions/make-test@master
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: MakeTest
+        uses: saltbo/actions/make-test@master
         with:
           language: golang
           context: .
