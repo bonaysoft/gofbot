@@ -7,6 +7,6 @@ import (
 )
 
 func TestNewRobot(t *testing.T) {
-	_, e := newRobot("../robots/wxwork4gitlab.yaml")
+	_, e := newRobot("./testdata/example.yaml")
 	assert.NoError(t, e)
 }

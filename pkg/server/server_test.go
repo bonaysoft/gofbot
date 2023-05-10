@@ -39,7 +39,7 @@ func TestServer_Run(t *testing.T) {
 	ts := httptest.NewServer(&testServer{})
 	defer ts.Close()
 
-	robots, err := robot.Load("../robots")
+	robots, err := robot.Load("../robot/testdata")
 	assert.NoError(t, err)
 
 	s, e := New(robots)
