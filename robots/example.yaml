@@ -1,4 +1,4 @@
-name: wxwork4gitlab
+name: example
 webhook: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=0d3ffb7e-xxxx-xxxx-xxxx-bea0db5e581a
 bodytpl: '{"msgtype":"markdown","markdown":{"content":"$template"}}'
 messages:

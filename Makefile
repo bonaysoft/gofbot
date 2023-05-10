@@ -1,9 +1,9 @@
-.PHONY: test
+.PHONY: test build
 
 BUILD_TIME := $(shell date "+%F %T")
 MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MKFILE_DIR := $(dir $(MKFILE_PATH))
-TARGET = ${MKFILE_DIR}build/gofbot
+TARGET = ${MKFILE_DIR}build/bin/gofbot
 
 RELEASE?=$(shell git describe --tags)
 GIT_REPO_INFO=$(shell git config --get remote.origin.url)
@@ -21,11 +21,10 @@ mod:
 build:
 	@echo "-------------- building the program ---------------"
 	cd ${MKFILE_DIR} &&  go build -v -ldflags "-s -w    \
-		-X main.repo=${GIT_REPO_INFO}					\
-		-X main.commit=${COMMIT}						\
-		-X main.version=${RELEASE}						\
-		-X 'main.buildTime=${BUILD_TIME}'				\
-		" -o ${TARGET} ${MKFILE_DIR}server
+		-X github.com/bonaysoft/gofbot/cmd.repo=${GIT_REPO_INFO}					\
+		-X github.com/bonaysoft/gofbot/cmd.commit=${COMMIT}						\
+		-X github.com/bonaysoft/gofbot/cmd.release=${RELEASE}						\
+		" -o ${TARGET}
 	@echo "-------------- version detail ---------------"
 	@${TARGET} -v
 

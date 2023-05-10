@@ -1,0 +1,21 @@
+name: build
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: saltbo/actions/release-image@master
+        with:
+          project-name: gofbot
+          language: golang
+          context: .
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          tags: ghcr.io/bonaysoft/gofbot:latest, ghcr.io/bonaysoft/gofbot:${{ github.ref_name }}
