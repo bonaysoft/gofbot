@@ -2,7 +2,6 @@ package robot
 
 import (
 	"bytes"
-	"log"
 	"regexp"
 	"strconv"
 	"text/template"
@@ -26,14 +25,8 @@ func NewMessage(exp string, template string) *Message {
 
 func (m *Message) Build(params Map) string {
 	funcMap := sprig.TxtFuncMap()
-	funcMap["larkUserOpenId"] = func(email string) string {
-		resp, err := lark.NewClient().GetOpenId(email)
-		if err != nil {
-			log.Println(err)
-			return ""
-		}
-
-		return resp.OpenId
+	for k, f := range lark.FuncMap() {
+		funcMap[k] = f
 	}
 
 	buf := bytes.NewBufferString("")

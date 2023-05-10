@@ -16,7 +16,7 @@ func TestBuildMessage(t *testing.T) {
 			"email": "yanbo@email.com",
 		},
 	}
-	tpl := `name: {{ .name }}, age: {{ .age }}, city: {{ .info.city }}, openid: {{ larkUserOpenId .info.email }}`
+	tpl := `name: {{ .name }}, age: {{ .age }}, city: {{ .info.city }}, openid: {{ larkEmail2openID .info.email }}`
 	msg := NewMessage("", tpl).Build(params)
 	assert.Contains(t, msg, params["name"])
 	assert.Contains(t, msg, params["age"])
