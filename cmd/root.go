@@ -26,10 +26,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bonaysoft/gofbot/pkg/robot"
-	"github.com/bonaysoft/gofbot/pkg/server"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/bonaysoft/gofbot/pkg/adapters"
+	"github.com/bonaysoft/gofbot/pkg/bot"
 )
 
 var cfgFile string
@@ -49,16 +50,15 @@ var rootCmd = &cobra.Command{
 	Short:   "A brief description of your application",
 	Version: fmt.Sprintf("%s, repo: %s, commit: %s", release, repo, commit),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		robots, err := robot.Load("robots")
+		adapter, err := adapters.GetAdapter("telegram")
 		if err != nil {
 			return err
 		}
-
-		s, err := server.New(robots)
+		
+		s, err := bot.NewServer(adapter)
 		if err != nil {
 			return err
 		}
-
 		return s.Run(":9613")
 	},
 }

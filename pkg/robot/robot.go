@@ -20,13 +20,14 @@ var hc = resty.New()
 
 type Robot struct {
 	Name     string     `yaml:"name"`
+	Kind     string     `yaml:"kind"`
 	Alias    string     `yaml:"uuid"`
 	WebHook  string     `yaml:"webhook"`
 	BodyTpl  string     `yaml:"bodytpl"`
 	Messages []*Message `yaml:"messages"`
 }
 
-func newRobot(yamlPath string) (*Robot, error) {
+func NewRobot(yamlPath string) (*Robot, error) {
 	yamlFile, err := os.ReadFile(yamlPath)
 	if err != nil {
 		return nil, err
@@ -42,9 +43,9 @@ func newRobot(yamlPath string) (*Robot, error) {
 	fmt.Printf("%s => %s\n", robot.Name, robot.Alias)
 	errors := make([]string, 0)
 	for _, msg := range robot.Messages {
-		exp, err2 := regexp.Compile(msg.Regexp)
+		exp, err := regexp.Compile(msg.Regexp)
 		if err != nil {
-			errors = append(errors, err2.Error())
+			errors = append(errors, err.Error())
 			continue
 		}
 
@@ -91,7 +92,7 @@ func findRobots(root string, creator func(filepath string) error) error {
 func Load(robotsPath string) ([]*Robot, error) {
 	robots := make([]*Robot, 0)
 	robotCreator := func(filepath string) error {
-		robot, err := newRobot(filepath)
+		robot, err := NewRobot(filepath)
 		if err != nil {
 			return err
 		}
