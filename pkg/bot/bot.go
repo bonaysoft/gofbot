@@ -7,36 +7,31 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-joe/file-memory"
 	"github.com/go-joe/joe"
-	"github.com/samber/lo"
 	"go.uber.org/zap"
 
-	"github.com/bonaysoft/gofbot/pkg/robot"
+	"github.com/bonaysoft/gofbot/pkg/messenger"
 )
 
 type Server struct {
 	bot *joe.Bot
 
-	botAnswers *robot.Robot
+	messenger messenger.Manager
 }
 
-func NewServer(adapter Adapter) (*Server, error) {
-	bot := joe.New("gofbot", joe.WithLogLevel(zap.DebugLevel), adapter.Adapter())
+func NewServer(adapter Adapter, messenger messenger.Manager) (*Server, error) {
+	bot := joe.New("gofbot",
+		joe.WithLogLevel(zap.DebugLevel),
+		file.Memory("./data/memory.json"),
+		adapter.Adapter())
 	bot.Brain.RegisterHandler(adapter.GetHandler(bot))
 	bot.Respond("ping", func(msg joe.Message) error {
 		msg.Respond("pong")
 		return nil
 	})
-	answers, err := robot.Load("./robots")
-	if err != nil {
-		return nil, err
-	}
-	answer, ok := lo.Find(answers, func(item *robot.Robot) bool { return item.Kind == adapter.Name() })
-	if !ok {
-		return nil, fmt.Errorf("not found robot for %s", adapter)
-	}
 
-	return &Server{bot: bot, botAnswers: answer}, nil
+	return &Server{bot: bot, messenger: messenger}, nil
 }
 
 func (b *Server) Run(addr string) error {
@@ -76,15 +71,15 @@ func (b *Server) makeRobotResponse(r *http.Request) ([]byte, error) {
 		return nil, err
 	}
 
-	params := make(robot.Map)
+	params := make(map[string]any)
 	if err := json.Unmarshal(body, &params); err != nil {
 		return nil, err
 	}
 
-	msg, ok := b.botAnswers.MatchMsg(body)
+	msg, ok := b.messenger.Match(params)
 	if !ok {
 		return nil, fmt.Errorf("not found")
 	}
 
-	return []byte(b.botAnswers.Render(msg.Build(params))), nil
+	return b.messenger.BuildReply(msg, params)
 }

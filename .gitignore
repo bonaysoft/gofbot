@@ -16,5 +16,6 @@ build
 # Project
 robots/*.yml
 robots/*.yaml
-!robots/example.yaml
+!pigeonnest/example.yaml
 .env
+data

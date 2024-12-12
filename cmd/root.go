@@ -31,6 +31,8 @@ import (
 
 	"github.com/bonaysoft/gofbot/pkg/adapters"
 	"github.com/bonaysoft/gofbot/pkg/bot"
+	"github.com/bonaysoft/gofbot/pkg/messenger"
+	"github.com/bonaysoft/gofbot/pkg/storage/memory"
 )
 
 var cfgFile string
@@ -55,7 +57,12 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		s, err := bot.NewServer(adapter)
+		store := memory.NewStorage("./data/pigeonnest")
+		if err := store.Start(cmd.Context()); err != nil {
+			return err
+		}
+
+		s, err := bot.NewServer(adapter, messenger.NewDefaultManager(store))
 		if err != nil {
 			return err
 		}

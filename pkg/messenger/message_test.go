@@ -1,4 +1,4 @@
-package robot
+package messenger
 
 import (
 	"fmt"
