@@ -50,11 +50,11 @@ var rootCmd = &cobra.Command{
 	Short:   "A brief description of your application",
 	Version: fmt.Sprintf("%s, repo: %s, commit: %s", release, repo, commit),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		adapter, err := adapters.GetAdapter("telegram")
+		adapter, err := adapters.GetAdapter("lark")
 		if err != nil {
 			return err
 		}
-		
+
 		s, err := bot.NewServer(adapter)
 		if err != nil {
 			return err

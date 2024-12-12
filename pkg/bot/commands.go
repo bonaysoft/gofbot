@@ -24,15 +24,15 @@ func (c *Commands) Handle(command string, chat *Chat) {
 			return
 		}
 
-		webhook := fmt.Sprintf("http://localhost:8080/api/webhooks/%s", webhookID)
-		if chat.Channel == chat.ChatID {
+		webhook := fmt.Sprintf("http://localhost:9613/api/webhooks/%s", webhookID)
+		if chat.ChatType == ChatTypeP2P {
 			c.bot.Say(chat.ChatID, fmt.Sprintf("Your webhook is: %s", webhook))
 			return
 		}
 		c.bot.Say(chat.ChatID, fmt.Sprintf("Your webhook is: %s", webhook))
 		c.bot.Say(chat.Channel, "Congratulations! Your webhook has been sent to you.")
 	case "reset_webhook":
-		
+
 	case "help":
 
 	}

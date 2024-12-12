@@ -86,5 +86,5 @@ func (b *Server) makeRobotResponse(r *http.Request) ([]byte, error) {
 		return nil, fmt.Errorf("not found")
 	}
 
-	return []byte(msg.Build(params)), nil
+	return []byte(b.botAnswers.Render(msg.Build(params))), nil
 }

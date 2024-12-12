@@ -8,6 +8,7 @@ import (
 
 var adapters = map[string]bot.Adapter{
 	"telegram": NewTelegram(),
+	"lark":     NewLark(),
 }
 
 func GetAdapter(name string) (bot.Adapter, error) {

@@ -1,0 +1,23 @@
+apiVersion: v1alpha1
+kind: Message
+metadata:
+  name: gl-push
+  namespace: lark
+spec:
+  match:
+    selector:
+      event_type: issue
+  reply:
+    text: |-
+      test push message.
+      num1: {{ .test }}
+      num2: {{ .test2 }}
+
+#    template:
+#      formater: json
+#      object:
+#        template_id: xxxxxxxxxxxx
+#        template_version_name: 1.0.0
+#        template_variable:
+#          key1: {{ .test }}
+#          key2: {{ .test2 }}

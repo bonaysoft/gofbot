@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-joe/joe"
 	telegram "github.com/robertgzr/joe-telegram-adapter"
+	"github.com/spf13/viper"
 
 	"github.com/bonaysoft/gofbot/pkg/bot"
 )
@@ -22,12 +23,16 @@ func (tg *Telegram) Name() string {
 }
 
 func (tg *Telegram) Adapter() joe.Module {
-	return telegram.Adapter("7887174654:AAGbt87xaM1FTpTWqeq3Z1lo8VMqtN91GpA")
+	return telegram.Adapter(viper.GetString("TG_TOKEN"))
 }
 
 func (tg *Telegram) GetHandler(jBot *joe.Bot) any {
 	cmd := bot.NewCommands(jBot)
 	return func(ctx context.Context, ev telegram.ReceiveCommandEvent) {
-		cmd.Handle(ev.Arg0, &bot.Chat{Channel: ev.Channel(), ChatID: strconv.Itoa(ev.From.ID)})
+		chatType := bot.ChatTypeP2P
+		if ev.Channel() != strconv.Itoa(ev.From.ID) {
+			chatType = bot.ChatTypeGroup
+		}
+		cmd.Handle(ev.Arg0, &bot.Chat{Channel: ev.Channel(), ChatID: strconv.Itoa(ev.From.ID), ChatType: chatType})
 	}
 }

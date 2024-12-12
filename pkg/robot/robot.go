@@ -65,6 +65,11 @@ func (r *Robot) MatchMsg(body []byte) (*Message, bool) {
 	})
 }
 
+func (r *Robot) Render(msg string) string {
+	body := bytes.NewBufferString(strings.Replace(r.BodyTpl, "$template", msg, -1))
+	return body.String()
+}
+
 func (r *Robot) BuildReply(msg string) (*resty.Response, error) {
 	body := bytes.NewBufferString(strings.Replace(r.BodyTpl, "$template", msg, -1))
 	resp, err := hc.R().SetBody(body).Post(r.WebHook)
