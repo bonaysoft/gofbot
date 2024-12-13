@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
@@ -39,7 +40,7 @@ func (s *Storage) Start(ctx context.Context) error {
 		for {
 			select {
 			case event, ok := <-w.Events:
-				if !ok {
+				if !ok || strings.HasSuffix(event.Name, "~") {
 					return
 				}
 

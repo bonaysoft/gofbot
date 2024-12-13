@@ -38,14 +38,14 @@ func (b *Server) Run(addr string) error {
 	go func() {
 		http.HandleFunc("POST /api/webhooks/{id}", func(w http.ResponseWriter, r *http.Request) {
 			id := r.PathValue("id")
-			var chatID string
-			exists, _ := b.bot.Store.Get(id, &chatID)
+			var chat Chat
+			exists, _ := b.bot.Store.Get(id, &chat)
 			if !exists {
 				w.WriteHeader(http.StatusNotFound)
 				return
 			}
 
-			output, err := b.makeRobotResponse(r)
+			output, err := b.makeRobotResponse(r, chat)
 			if err != nil {
 				b.bot.Logger.Error(err.Error())
 				w.WriteHeader(http.StatusInternalServerError)
@@ -53,7 +53,7 @@ func (b *Server) Run(addr string) error {
 			}
 
 			// b.bot.Adapter
-			b.bot.Say(chatID, string(output))
+			b.bot.Say(chat.Channel, string(output))
 			w.WriteHeader(http.StatusOK)
 		})
 		if err := http.ListenAndServe(addr, nil); err != nil {
@@ -65,7 +65,7 @@ func (b *Server) Run(addr string) error {
 	return b.bot.Run()
 }
 
-func (b *Server) makeRobotResponse(r *http.Request) ([]byte, error) {
+func (b *Server) makeRobotResponse(r *http.Request, chat Chat) ([]byte, error) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
@@ -76,6 +76,7 @@ func (b *Server) makeRobotResponse(r *http.Request) ([]byte, error) {
 		return nil, err
 	}
 
+	params["chatProvider"] = chat.Provider
 	msg, ok := b.messenger.Match(params)
 	if !ok {
 		return nil, fmt.Errorf("not found")

@@ -33,6 +33,6 @@ func (tg *Telegram) GetHandler(jBot *joe.Bot) any {
 		if ev.Channel() != strconv.Itoa(ev.From.ID) {
 			chatType = bot.ChatTypeGroup
 		}
-		cmd.Handle(ev.Arg0, &bot.Chat{Channel: ev.Channel(), ChatID: strconv.Itoa(ev.From.ID), ChatType: chatType})
+		cmd.Handle(ev.Arg0, &bot.Chat{Provider: tg.Name(), Channel: ev.Channel(), ChatID: strconv.Itoa(ev.From.ID), ChatType: chatType})
 	}
 }

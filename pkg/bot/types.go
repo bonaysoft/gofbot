@@ -11,6 +11,7 @@ const (
 )
 
 type Chat struct {
+	Provider string
 	Channel  string
 	ChatID   string
 	ChatType ChatType

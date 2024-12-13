@@ -19,7 +19,7 @@ func (c *Commands) Handle(command string, chat *Chat) {
 	switch command {
 	case "get_webhook":
 		webhookID := lo.RandomString(16, lo.LowerCaseLettersCharset)
-		if err := c.bot.Store.Set(webhookID, chat.Channel); err != nil {
+		if err := c.bot.Store.Set(webhookID, chat); err != nil {
 			c.bot.Logger.Error(err.Error())
 			return
 		}

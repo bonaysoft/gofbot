@@ -42,7 +42,7 @@ func (l *Lark) GetHandler(jBot *joe.Bot) any {
 			return
 		}
 
-		cmd.Handle(ev.Text, &bot.Chat{Channel: ev.Channel, ChatID: ev.AuthorID, ChatType: makeChatType(lEv.Message.ChatType)})
+		cmd.Handle(ev.Text, &bot.Chat{Provider: l.Name(), Channel: ev.Channel, ChatID: ev.AuthorID, ChatType: makeChatType(lEv.Message.ChatType)})
 	}
 }
 
