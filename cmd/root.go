@@ -32,7 +32,7 @@ import (
 	"github.com/bonaysoft/gofbot/pkg/adapters"
 	"github.com/bonaysoft/gofbot/pkg/bot"
 	"github.com/bonaysoft/gofbot/pkg/messenger"
-	"github.com/bonaysoft/gofbot/pkg/storage/memory"
+	"github.com/bonaysoft/gofbot/pkg/storage/file"
 )
 
 var cfgFile string
@@ -57,7 +57,7 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		store := memory.NewStorage("./data/pigeonnest")
+		store := file.NewStorage("./data/pigeonnest")
 		if err := store.Start(cmd.Context()); err != nil {
 			return err
 		}
