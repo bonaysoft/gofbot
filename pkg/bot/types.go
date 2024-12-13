@@ -1,6 +1,10 @@
 package bot
 
-import "github.com/go-joe/joe"
+import (
+	"text/template"
+
+	"github.com/go-joe/joe"
+)
 
 type ChatType int
 
@@ -21,4 +25,5 @@ type Adapter interface {
 	Name() string
 	Adapter() joe.Module
 	GetHandler(bot *joe.Bot) any
+	GetFunMap() template.FuncMap
 }

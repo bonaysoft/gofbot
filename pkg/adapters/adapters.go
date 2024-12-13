@@ -6,9 +6,11 @@ import (
 	"github.com/bonaysoft/gofbot/pkg/bot"
 )
 
-var adapters = map[string]bot.Adapter{
-	"telegram": NewTelegram(),
-	"lark":     NewLark(),
+type AdapterConstruct func() bot.Adapter
+
+var adapters = map[string]AdapterConstruct{
+	"telegram": NewTelegram,
+	"lark":     NewLark,
 }
 
 func GetAdapter(name string) (bot.Adapter, error) {
@@ -17,5 +19,5 @@ func GetAdapter(name string) (bot.Adapter, error) {
 		return nil, fmt.Errorf("%s not exist", name)
 	}
 
-	return adapter, nil
+	return adapter(), nil
 }

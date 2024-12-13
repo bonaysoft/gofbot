@@ -3,6 +3,7 @@ package adapters
 import (
 	"context"
 	"strconv"
+	"text/template"
 
 	"github.com/go-joe/joe"
 	telegram "github.com/robertgzr/joe-telegram-adapter"
@@ -14,7 +15,7 @@ import (
 type Telegram struct {
 }
 
-func NewTelegram() *Telegram {
+func NewTelegram() bot.Adapter {
 	return &Telegram{}
 }
 
@@ -35,4 +36,8 @@ func (tg *Telegram) GetHandler(jBot *joe.Bot) any {
 		}
 		cmd.Handle(ev.Arg0, &bot.Chat{Provider: tg.Name(), Channel: ev.Channel(), ChatID: strconv.Itoa(ev.From.ID), ChatType: chatType})
 	}
+}
+
+func (tg *Telegram) GetFunMap() template.FuncMap {
+	return template.FuncMap{}
 }

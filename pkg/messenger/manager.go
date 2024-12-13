@@ -23,11 +23,12 @@ type Manager interface {
 }
 
 type DefaultManager struct {
-	store storage.Manager
+	store   storage.Manager
+	funcMap template.FuncMap
 }
 
-func NewDefaultManager(store storage.Manager) *DefaultManager {
-	return &DefaultManager{store: store}
+func NewDefaultManager(store storage.Manager, funcMap template.FuncMap) *DefaultManager {
+	return &DefaultManager{store: store, funcMap: funcMap}
 }
 
 func (d *DefaultManager) Match(params map[string]any) (*v1alpha1.Message, bool) {
@@ -67,9 +68,9 @@ func (d *DefaultManager) BuildReply(msg *v1alpha1.Message, params map[string]any
 	}
 
 	funcMap := sprig.TxtFuncMap()
-	// for k, f := range lark.FuncMap() {
-	// 	funcMap[k] = f
-	// }
+	for k, f := range d.funcMap {
+		funcMap[k] = f
+	}
 
 	buf := bytes.NewBufferString("")
 	t := template.Must(template.New("msg").Funcs(funcMap).Parse(msgTemplate))

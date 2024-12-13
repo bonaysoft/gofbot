@@ -62,7 +62,7 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		s, err := bot.NewServer(adapter, messenger.NewDefaultManager(store))
+		s, err := bot.NewServer(adapter, messenger.NewDefaultManager(store, adapter.GetFunMap()))
 		if err != nil {
 			return err
 		}
