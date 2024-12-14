@@ -34,12 +34,11 @@ metadata:
 spec:
   selector:
     matchLabels:
-      chatProvider: lark
-      event_type: issue
+      type: xxCreate
 
   reply:
     text: |-
-      test push message.
+      This is a test message.
       name: {{ .name }}
       intro: {{ .intro }}
       hello: {{ .other.key }}
@@ -70,12 +69,12 @@ curl -X POST -H "Content-Type: application/json" -d '{"type": "xxCreate", "name"
 
 ## Supports
 
--[x] Telegram
--[ ] Slack
--[ ] RocketChat
--[ ] Mattermost
--[ ] Discord
--[x] Lark
--[ ] DingTalk
--[ ] WeCom
+- [x] Telegram
+- [ ] Slack
+- [ ] RocketChat
+- [ ] Mattermost
+- [ ] Discord
+- [x] Lark
+- [ ] DingTalk
+- [ ] WeCom
 
