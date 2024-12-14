@@ -1,0 +1,14 @@
+apiVersion: v1alpha1
+kind: Message
+metadata:
+  name: gl-any-note
+spec:
+  selector:
+    matchLabels:
+      event_type: note
+  reply:
+    text: |-
+      Project：{{ .project.name }}
+      Content：{{ .object_attributes.note }}
+      CreatedBy：{{ .user.name }}
+      CreatedAt：{{ .object_attributes.created_at }}

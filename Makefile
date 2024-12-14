@@ -20,7 +20,7 @@ mod:
 
 build:
 	@echo "-------------- building the program ---------------"
-	cd ${MKFILE_DIR} &&  go build -v -ldflags "-s -w    \
+	cd ${MKFILE_DIR} && CGO_ENABLED=0 go build -v -ldflags "-s -w    \
 		-X github.com/bonaysoft/gofbot/cmd.repo=${GIT_REPO_INFO}					\
 		-X github.com/bonaysoft/gofbot/cmd.commit=${COMMIT}						\
 		-X github.com/bonaysoft/gofbot/cmd.release=${RELEASE}						\

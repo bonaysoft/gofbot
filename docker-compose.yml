@@ -1,0 +1,15 @@
+services:
+  gofbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+#    image: bonaysoft/gofbot:latest
+    command:
+      - --adapter
+      - telegram
+    env_file:
+      - .env
+    ports:
+      - "9613:9613"
+    volumes:
+      - ./data:/app/data

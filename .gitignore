@@ -16,4 +16,8 @@ build
 # Project
 robots/*.yml
 robots/*.yaml
-!robots/example.yaml
+!pigeonnest/example.yaml
+.env
+data
+go.work
+go.work.sum

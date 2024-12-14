@@ -1,0 +1,38 @@
+apiVersion: v1alpha1
+kind: Message
+metadata:
+  name: gl-lark-general
+spec:
+  selector:
+    matchLabels:
+      chatProvider: lark
+    matchExpressions:
+      - key: event_type
+        operator: In
+        values:
+          - issue
+          - merge_request
+  reply:
+    json:
+      header:
+        title:
+          content: "{{ .object_attributes.action }} a {{ .object_kind | lower }} by {{.user.username}}"
+          tag: plain_text
+      elements:
+        - tag: div
+          text:
+            content: |-
+              项目：{{ .project.name }}
+              标题：{{ .object_attributes.title }}
+              状态：{{ .object_attributes.state }}
+              操作人：{{ larkAtTransform .user.username `@foxmail.com` }}
+              创建时间：{{ .object_attributes.created_at }}
+            tag: lark_md
+        - tag: action
+          actions:
+            - tag: button
+              text:
+                content: "查看"
+                tag: lark_md
+              url: "{{ .object_attributes.url }}"
+              type: default
