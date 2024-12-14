@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/bonaysoft/gofbot/pkg/bot"
+	"github.com/bonaysoft/gofbot/pkg/errors"
 )
 
 type Lark struct {
@@ -76,13 +77,13 @@ func (l *Lark) larkEmail2OpenID(email string) string {
 	req := larkcontact.NewBatchGetIdUserReqBuilder().UserIdType("open_id").Body(body).Build()
 	resp, err := l.client.Contact.User.BatchGetId(ctx, req)
 	if err != nil {
-		slog.Error("larkEmail2OpenID", err)
+		slog.Error("larkEmail2OpenID", errors.With(err))
 		return email
 	} else if !resp.Success() {
-		slog.Error("larkEmail2OpenID", resp.Error())
+		slog.Error("larkEmail2OpenID", errors.With(resp.CodeError))
 		return email
 	} else if len(resp.Data.UserList) == 0 {
-		slog.Error("larkEmail2OpenID", "err", fmt.Errorf("not found"))
+		slog.Error("larkEmail2OpenID", "error", fmt.Errorf("not found"))
 		return email
 	}
 

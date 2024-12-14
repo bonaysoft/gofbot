@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 
 	"github.com/bonaysoft/gofbot/apis/message/v1alpha1"
+	"github.com/bonaysoft/gofbot/pkg/errors"
 )
 
 type FileStorage struct {
@@ -48,7 +49,7 @@ func (s *FileStorage) Start(ctx context.Context) error {
 				if event.Op.Has(fsnotify.Create) {
 					slog.Info("Create file", "filename", event.Name)
 					if err := s.cacheStaticMessageFile(event.Name); err != nil {
-						slog.Error("cacheStaticMessageFile: %s", err)
+						slog.Error("cacheStaticMessageFile failed", errors.With(err))
 					}
 				} else if event.Op.Has(fsnotify.Remove) || event.Op.Has(fsnotify.Rename) {
 					slog.Info("Remove file", "filename", event.Name)
@@ -58,7 +59,7 @@ func (s *FileStorage) Start(ctx context.Context) error {
 				if !ok {
 					return
 				}
-				slog.Error("storage watch", "error", err)
+				slog.Error("storage watch", errors.With(err))
 			}
 		}
 	}()
