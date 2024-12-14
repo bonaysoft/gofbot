@@ -19,3 +19,5 @@ robots/*.yaml
 !pigeonnest/example.yaml
 .env
 data
+go.work
+go.work.sum

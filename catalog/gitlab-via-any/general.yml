@@ -1,0 +1,19 @@
+apiVersion: v1alpha1
+kind: Message
+metadata:
+  name: gl-any-general
+spec:
+  selector:
+    matchExpressions:
+      - key: event_type
+        operator: In
+        values:
+          - issue
+          - merge_request
+  reply:
+    text: |-
+      Project：{{ .project.name }}
+      Title：{{ .object_attributes.title }}
+      Status：{{ .object_attributes.state }}
+      Operator：{{ larkAtTransform .user.username `@foxmail.com` }}
+      CreatedAt：{{ .object_attributes.created_at }}
