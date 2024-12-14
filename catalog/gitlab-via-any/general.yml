@@ -15,5 +15,5 @@ spec:
       Project：{{ .project.name }}
       Title：{{ .object_attributes.title }}
       Status：{{ .object_attributes.state }}
-      Operator：{{ larkAtTransform .user.username `@foxmail.com` }}
+      Operator：{{ .user.username }}
       CreatedAt：{{ .object_attributes.created_at }}

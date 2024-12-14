@@ -16,4 +16,4 @@ RUN apt update && apt install -y openssh-client ca-certificates
 WORKDIR /app
 COPY --from=builder /app/build/bin/gofbot /app/gofbot
 COPY catalog /app/catalog
-CMD ["/app/gofbot"]
+ENTRYPOINT ["/app/gofbot", "serve"]

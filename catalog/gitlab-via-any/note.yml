@@ -5,11 +5,10 @@ metadata:
 spec:
   selector:
     matchLabels:
-      chatProvider: lark
       event_type: note
   reply:
     text: |-
       Project：{{ .project.name }}
-      Content：{{ larkAtTransform4All .object_attributes.note `@foxmail.com` }}
+      Content：{{ .object_attributes.note }}
       CreatedBy：{{ .user.name }}
       CreatedAt：{{ .object_attributes.created_at }}
