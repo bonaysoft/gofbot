@@ -3,8 +3,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: bonaysoft/gofbot:latest
+#    image: bonaysoft/gofbot:latest
+    command:
+      - --adapter
+      - telegram
     ports:
       - "8080:8080"
     volumes:
-      - ./data:/data
+      - ./data:/app/data

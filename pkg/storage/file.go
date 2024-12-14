@@ -1,4 +1,4 @@
-package file
+package storage
 
 import (
 	"context"
@@ -11,22 +11,23 @@ import (
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/util/yaml"
 
 	"github.com/bonaysoft/gofbot/apis/message/v1alpha1"
 )
 
-type Storage struct {
-	srcDir string
+type FileStorage struct {
+	storeDir string
 
 	cache sync.Map
 }
 
-func NewStorage(srcDir string) *Storage {
-	return &Storage{srcDir: srcDir}
+func NewStorage() (Manager, error) {
+	return &FileStorage{storeDir: viper.GetString("storage-file-location")}, nil
 }
 
-func (s *Storage) Start(ctx context.Context) error {
+func (s *FileStorage) Start(ctx context.Context) error {
 	if err := s.loadExistedMessages(); err != nil {
 		return err
 	}
@@ -62,10 +63,10 @@ func (s *Storage) Start(ctx context.Context) error {
 		}
 	}()
 
-	return w.Add(s.srcDir)
+	return w.Add(s.storeDir)
 }
 
-func (s *Storage) List(ctx context.Context) ([]v1alpha1.Message, error) {
+func (s *FileStorage) List(ctx context.Context) ([]v1alpha1.Message, error) {
 	messages := make([]v1alpha1.Message, 0)
 	s.cache.Range(func(key, value any) bool {
 		filename := key.(string)
@@ -77,7 +78,7 @@ func (s *Storage) List(ctx context.Context) ([]v1alpha1.Message, error) {
 	return messages, nil
 }
 
-func (s *Storage) readFile2Message(name string) (*v1alpha1.Message, error) {
+func (s *FileStorage) readFile2Message(name string) (*v1alpha1.Message, error) {
 	yamlFile, err := os.ReadFile(name)
 	if err != nil {
 		return nil, err
@@ -90,8 +91,8 @@ func (s *Storage) readFile2Message(name string) (*v1alpha1.Message, error) {
 	return &message, nil
 }
 
-func (s *Storage) loadExistedMessages() error {
-	return filepath.Walk(s.srcDir, func(filename string, info os.FileInfo, err error) error {
+func (s *FileStorage) loadExistedMessages() error {
+	return filepath.Walk(s.storeDir, func(filename string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		} else if info.IsDir() {
@@ -104,7 +105,7 @@ func (s *Storage) loadExistedMessages() error {
 	})
 }
 
-func (s *Storage) cacheStaticMessageFile(filename string) error {
+func (s *FileStorage) cacheStaticMessageFile(filename string) error {
 	if _, err := s.readFile2Message(filename); err != nil {
 		return fmt.Errorf("readFile2Message: %s - %s\n", filename, err)
 	}

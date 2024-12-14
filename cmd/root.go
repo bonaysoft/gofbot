@@ -28,11 +28,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	"github.com/bonaysoft/gofbot/pkg/adapters"
-	"github.com/bonaysoft/gofbot/pkg/bot"
-	"github.com/bonaysoft/gofbot/pkg/messenger"
-	"github.com/bonaysoft/gofbot/pkg/storage/file"
 )
 
 var cfgFile string
@@ -49,25 +44,8 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "gofbot",
-	Short:   "A brief description of your application",
+	Short:   "A general forward bot for any chat platform and any webhooks",
 	Version: fmt.Sprintf("%s, repo: %s, commit: %s", release, repo, commit),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		adapter, err := adapters.GetAdapter("lark")
-		if err != nil {
-			return err
-		}
-
-		store := file.NewStorage("./data/pigeonnest")
-		if err := store.Start(cmd.Context()); err != nil {
-			return err
-		}
-
-		s, err := bot.NewServer(adapter, messenger.NewDefaultManager(store, adapter.GetFunMap()))
-		if err != nil {
-			return err
-		}
-		return s.Run(":9613")
-	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

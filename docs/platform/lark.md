@@ -6,7 +6,7 @@ Lark is a Chinese chat platform.
 
 Use lark adapter, you must set the following environment variables:
 
-- LARK_APP_ID
+- LARK_APPID
 - LARK_SECRET
 
 ## Template Functions
