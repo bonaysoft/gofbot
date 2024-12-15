@@ -1,6 +1,6 @@
 services:
   gofbot:
-    image: bonaysoft/gofbot:latest
+    image: ghcr.io/bonaysoft/gofbot:latest
     command:
       - --adapter
       - telegram
