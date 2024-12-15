@@ -18,13 +18,23 @@ It was a generic webhook endpoint to call some notifications.
 
 ## Non-Features
 
-- One robot connect to multiple chat platform, your should use multiple robots
-- Message persistence is not supported and messages are not guaranteed to be lost, If you cannot tolerate message loss,
-  you should use it with the event bus
+- If you want One robot connect to multiple chat platform at the same time, you should start up multiple robots.
+- If you cannot tolerate message loss, you should use it with the event bus.
 
 ## Getting Started
 
-### Step1: Write your Message
+### Step1: Install and boot your bot
+
+> If you don't have a bot, you should create one
+> first, [see here](https://core.telegram.org/bots#3-how-do-i-create-a-bot).
+
+```bash
+wget https://raw.githubusercontent.com/bonaysoft/gofbot/master/docker-compose.yml
+echo "TG_TOKEN=xxxx" > .env
+docker-compose up
+```
+
+### Step2: Write your Message for your bot
 
 ```yaml
 apiVersion: github.com/bonaysoft/gofbot/v1alpha1
@@ -44,16 +54,7 @@ spec:
       hello: {{ .other.key }}
 ```
 
-### Step2: Run the robot
-
-> If you don't have a bot, you should create one
-> first, [see here](https://core.telegram.org/bots#3-how-do-i-create-a-bot).
-
-```bash
-TG_TOKEN=xxx gofbot run --adapter telegram
-```
-
-### Step3: Get the webhook
+### Step2: Get the webhook
 
 Chat with your robot and get the webhook address.
 
@@ -78,3 +79,19 @@ curl -X POST -H "Content-Type: application/json" -d '{"type": "xxCreate", "name"
 - [ ] DingTalk
 - [ ] WeCom
 
+## Need Helps (Welcome PRs)
+
+- Implement more adapters
+- Build more Messages into the [catalog](catalog)
+- Rich the documents
+
+## Versioning
+
+We use [SemVer](http://semver.org/) for versioning. For the versions available,
+see the [tags on this repository][tags].
+
+## Authors
+
+- **Ambor** - *Initial work* - [saltbo](https://github.com/saltbo)
+
+See also the list of [contributors][contributors] who participated in this project.

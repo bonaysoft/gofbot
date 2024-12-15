@@ -1,9 +1,6 @@
 services:
   gofbot:
-    build:
-      context: .
-      dockerfile: Dockerfile
-#    image: bonaysoft/gofbot:latest
+    image: bonaysoft/gofbot:latest
     command:
       - --adapter
       - telegram
