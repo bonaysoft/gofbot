@@ -25,12 +25,14 @@ func NewServer(adapter Adapter, messenger messenger.Manager) (*Server, error) {
 		joe.WithLogLevel(zap.DebugLevel),
 		file.Memory("./data/memory.json"),
 		adapter.Adapter())
-	bot.Brain.RegisterHandler(adapter.GetHandler(bot))
 	bot.Respond("ping", func(msg joe.Message) error {
 		msg.Respond("pong")
 		return nil
 	})
 
+	for _, handler := range adapter.GetHandlers(bot) {
+		bot.Brain.RegisterHandler(handler)
+	}
 	return &Server{bot: bot, messenger: messenger}, nil
 }
 

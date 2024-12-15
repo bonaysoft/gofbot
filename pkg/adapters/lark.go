@@ -11,11 +11,13 @@ import (
 
 	"github.com/go-joe/joe"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
+	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	larkevent "github.com/larksuite/oapi-sdk-go/v3/event"
 	larkcontact "github.com/larksuite/oapi-sdk-go/v3/service/contact/v3"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	larka "github.com/saltbo/joe-lark-adapter"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 
 	"github.com/bonaysoft/gofbot/pkg/bot"
 	"github.com/bonaysoft/gofbot/pkg/errors"
@@ -44,21 +46,40 @@ func (l *Lark) Adapter() joe.Module {
 	return larka.Adapter(l.appId, l.appSecret)
 }
 
-func (l *Lark) GetHandler(jBot *joe.Bot) any {
-	cmd := bot.NewCommands(jBot)
-	return func(ctx context.Context, ev joe.ReceiveMessageEvent) {
-		larkEvent := &larkevent.EventV2Body{
-			Event: &larkim.P2MessageReceiveV1Data{},
-		}
-		if err := json.Unmarshal(ev.Data.([]byte), larkEvent); err != nil {
-			return
-		}
-		lEv, ok := larkEvent.Event.(*larkim.P2MessageReceiveV1Data)
-		if !ok {
-			return
-		}
+func (l *Lark) GetHandlers(jBot *joe.Bot) []any {
+	logger := jBot.Logger.Named(l.Name())
+	botInfo, err := l.GetMe(context.Background())
+	if err != nil {
+		panic(err)
+	}
 
-		cmd.Handle(ev.Text, &bot.Chat{Provider: l.Name(), Channel: ev.Channel, ChatID: ev.AuthorID, ChatType: makeChatType(lEv.Message.ChatType)})
+	cmd := bot.NewCommands(jBot)
+	return []any{
+		func(ctx context.Context, ev joe.ReceiveMessageEvent) {
+			larkEvent := &larkevent.EventV2Body{Event: &larkim.P2MessageReceiveV1Data{}}
+			if err := json.Unmarshal(ev.Data.([]byte), larkEvent); err != nil {
+				logger.Error("json.Unmarshal", zap.Error(err))
+				return
+			}
+
+			lEv, ok := larkEvent.Event.(*larkim.P2MessageReceiveV1Data)
+			if !ok {
+				return
+			}
+
+			chatType := makeChatType(lEv.Message.ChatType)
+			if chatType != bot.ChatTypeP2P && !isTalk2me(lEv.Message.Mentions, botInfo) {
+				logger.Debug("not talking to me", zap.String("text", ev.Text))
+				return
+			}
+			command, err := cmd.Parse(ev.Text)
+			if err != nil {
+				logger.Error("cmd.Parse", zap.Error(err))
+				return
+			}
+
+			cmd.Handle(command, &bot.Chat{Provider: l.Name(), Channel: ev.Channel, ChatID: ev.AuthorID, ChatType: chatType})
+		},
 	}
 }
 
@@ -68,6 +89,20 @@ func (l *Lark) GetFunMap() template.FuncMap {
 		"larkAtTransform":     l.larkAtTransform,
 		"larkAtTransform4All": l.larkAtTransform4All,
 	}
+}
+
+func (l *Lark) GetMe(ctx context.Context) (*LarkBotInfo, error) {
+	resp, err := l.client.Get(ctx, "/open-apis/bot/v3/info", nil, larkcore.AccessTokenTypeTenant)
+	if err != nil {
+		return nil, err
+	}
+
+	var botInfoResp LarkBotInfoResponse
+	if err := resp.JSONUnmarshalBody(&botInfoResp, &larkcore.Config{Serializable: &larkcore.DefaultSerialization{}}); err != nil {
+		return nil, err
+	}
+
+	return &botInfoResp.Bot, nil
 }
 
 // larkEmail2OpenID 通过邮箱获取openid

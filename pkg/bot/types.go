@@ -24,6 +24,6 @@ type Chat struct {
 type Adapter interface {
 	Name() string
 	Adapter() joe.Module
-	GetHandler(bot *joe.Bot) any
+	GetHandlers(bot *joe.Bot) []any
 	GetFunMap() template.FuncMap
 }

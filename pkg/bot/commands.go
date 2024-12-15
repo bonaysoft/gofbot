@@ -2,10 +2,17 @@ package bot
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/go-joe/joe"
+	"github.com/samber/lo"
 	"go.uber.org/zap"
 )
+
+type Command struct {
+	Cmd  string
+	Args []string
+}
 
 type Commands struct {
 	bot *joe.Bot
@@ -15,9 +22,13 @@ func NewCommands(bot *joe.Bot) *Commands {
 	return &Commands{bot: bot}
 }
 
-func (c *Commands) Handle(command string, chat *Chat) {
+func (c *Commands) Parse(text string) (*Command, error) {
+	items := lo.Filter(strings.Split(text, " "), func(item string, index int) bool { return !strings.HasPrefix(item, "@") })
+	return &Command{Cmd: strings.TrimPrefix(items[0], "/"), Args: items[1:]}, nil
+}
 
-	switch command {
+func (c *Commands) Handle(command *Command, chat *Chat) {
+	switch command.Cmd {
 	case "get_webhook":
 		c.getWebhook(chat)
 	case "reset_webhook":
