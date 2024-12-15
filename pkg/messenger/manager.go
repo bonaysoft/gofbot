@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"text/template"
 
@@ -17,7 +18,7 @@ import (
 )
 
 type Manager interface {
-	Match(params map[string]any) (*v1alpha1.Message, bool)
+	Match(params map[string]any) (*v1alpha1.Message, error)
 
 	BuildReply(msg *v1alpha1.Message, params map[string]any) ([]byte, error)
 }
@@ -31,10 +32,10 @@ func NewDefaultManager(store storage.Manager, funcMap template.FuncMap) *Default
 	return &DefaultManager{store: store, funcMap: funcMap}
 }
 
-func (d *DefaultManager) Match(params map[string]any) (*v1alpha1.Message, bool) {
+func (d *DefaultManager) Match(params map[string]any) (*v1alpha1.Message, error) {
 	messages, err := d.store.List(context.Background())
 	if err != nil {
-		return nil, false
+		return nil, fmt.Errorf("list messages: %w", err)
 	}
 
 	// 目前只支持value为string的kv，后续可以把复杂结构拍平成一维的，比如{a:{b:{c:1}}}=> {a.b.c:1}
@@ -45,15 +46,20 @@ func (d *DefaultManager) Match(params map[string]any) (*v1alpha1.Message, bool) 
 		return key, value.(string)
 	})
 
-	message, ok := lo.Find(messages, func(item v1alpha1.Message) bool {
+	matcher := func(item v1alpha1.Message) bool {
 		selector, err := metav1.LabelSelectorAsSelector(&item.Spec.Selector)
 		if err != nil {
 			return false
 		}
 
 		return selector.Matches(labels.Set(newParams))
-	})
-	return &message, ok
+	}
+	message, ok := lo.Find(messages, matcher)
+	if !ok {
+		return nil, fmt.Errorf("find: not found any message")
+	}
+
+	return &message, nil
 }
 
 func (d *DefaultManager) BuildReply(msg *v1alpha1.Message, params map[string]any) ([]byte, error) {
@@ -61,7 +67,7 @@ func (d *DefaultManager) BuildReply(msg *v1alpha1.Message, params map[string]any
 	if msg.Spec.Reply.JSON != nil {
 		data, err := json.Marshal(msg.Spec.Reply.JSON)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("encode reply.json failed: %w", err)
 		}
 
 		msgTemplate = string(data)
@@ -75,7 +81,7 @@ func (d *DefaultManager) BuildReply(msg *v1alpha1.Message, params map[string]any
 	buf := bytes.NewBufferString("")
 	t := template.Must(template.New("msg").Funcs(funcMap).Parse(msgTemplate))
 	if err := t.Execute(buf, params); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("render message: %w", err)
 	}
 
 	newMsg := buf.String()

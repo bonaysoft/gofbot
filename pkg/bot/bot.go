@@ -57,7 +57,7 @@ func (b *Server) Run(addr string) error {
 			w.WriteHeader(http.StatusOK)
 		})
 		if err := http.ListenAndServe(addr, nil); err != nil {
-			log.Fatal(err)
+			log.Fatal(fmt.Errorf("server start failed: %s", err))
 			return
 		}
 	}()
@@ -68,18 +68,18 @@ func (b *Server) Run(addr string) error {
 func (b *Server) makeRobotResponse(r *http.Request, chat Chat) ([]byte, error) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read body: %w", err)
 	}
 
 	params := make(map[string]any)
 	if err := json.Unmarshal(body, &params); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decode body: %w", err)
 	}
 
 	params["chatProvider"] = chat.Provider
-	msg, ok := b.messenger.Match(params)
-	if !ok {
-		return nil, fmt.Errorf("not found")
+	msg, err := b.messenger.Match(params)
+	if err != nil {
+		return nil, fmt.Errorf("match message: %w", err)
 	}
 
 	return b.messenger.BuildReply(msg, params)
