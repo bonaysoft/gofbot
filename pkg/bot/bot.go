@@ -39,7 +39,7 @@ func NewServer(adapter Adapter, messenger messenger.Manager) (*Server, error) {
 func (b *Server) Run(addr string) error {
 	go func() {
 		http.HandleFunc("POST /api/webhooks/{id}", func(w http.ResponseWriter, r *http.Request) {
-			id := r.PathValue("id")
+			id := fmt.Sprintf("WH_%s", r.PathValue("id"))
 			var chat Chat
 			exists, _ := b.bot.Store.Get(id, &chat)
 			if !exists {
