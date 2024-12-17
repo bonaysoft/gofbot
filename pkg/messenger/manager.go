@@ -3,13 +3,12 @@ package messenger
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"strconv"
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/samber/lo"
+	"gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
@@ -63,32 +62,21 @@ func (d *DefaultManager) Match(params map[string]any) (*v1alpha1.Message, error)
 }
 
 func (d *DefaultManager) BuildReply(msg *v1alpha1.Message, params map[string]any) ([]byte, error) {
-	msgTemplate := msg.Spec.Reply.Text
-	if msg.Spec.Reply.JSON != nil {
-		data, err := json.Marshal(msg.Spec.Reply.JSON)
-		if err != nil {
-			return nil, fmt.Errorf("encode reply.json failed: %w", err)
-		}
-
-		msgTemplate = string(data)
-	}
-
 	funcMap := sprig.TxtFuncMap()
 	for k, f := range d.funcMap {
 		funcMap[k] = f
 	}
 
 	buf := bytes.NewBufferString("")
-	t := template.Must(template.New("msg").Funcs(funcMap).Parse(msgTemplate))
+	t := template.Must(template.New("msg").Funcs(funcMap).Parse(msg.Spec.Reply.YAMLString()))
 	if err := t.Execute(buf, params); err != nil {
 		return nil, fmt.Errorf("render message: %w", err)
 	}
 
-	newMsg := buf.String()
-	if strconv.CanBackquote(newMsg) {
-		return buf.Bytes(), nil
+	var reply v1alpha1.Reply
+	if err := yaml.Unmarshal(buf.Bytes(), &reply); err != nil {
+		return nil, err
 	}
 
-	result := strconv.Quote(newMsg)
-	return []byte(result)[1 : len(result)-1], nil
+	return []byte(reply.String()), nil
 }
