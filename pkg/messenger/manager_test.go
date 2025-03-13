@@ -1,6 +1,7 @@
 package messenger
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
 	"testing"
@@ -19,7 +20,8 @@ func TestDefaultManager_BuildReply(t *testing.T) {
 	tmpl, err := template.New("").Parse(stringContainNewline)
 	assert.NoError(t, err)
 
-	tmpl.Execute(nil, nil)
+	buf := bytes.NewBufferString("")
+	tmpl.Execute(buf, map[string]any{})
 }
 
 func Test_flattenMap(t *testing.T) {
