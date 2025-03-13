@@ -32,18 +32,11 @@ func NewDefaultManager(store storage.Manager, funcMap template.FuncMap) *Default
 }
 
 func (d *DefaultManager) Match(params map[string]any) (*v1alpha1.Message, error) {
+	newParams := flattenMap(params, 5)
 	messages, err := d.store.List(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("list messages: %w", err)
 	}
-
-	// 目前只支持value为string的kv，后续可以把复杂结构拍平成一维的，比如{a:{b:{c:1}}}=> {a.b.c:1}
-	newParams := lo.MapEntries(lo.PickBy(params, func(key string, value any) bool {
-		_, ok := value.(string)
-		return ok
-	}), func(key string, value any) (string, string) {
-		return key, value.(string)
-	})
 
 	matcher := func(item v1alpha1.Message) bool {
 		selector, err := metav1.LabelSelectorAsSelector(&item.Spec.Selector)
@@ -79,4 +72,46 @@ func (d *DefaultManager) BuildReply(msg *v1alpha1.Message, params map[string]any
 	}
 
 	return []byte(reply.String()), nil
+}
+
+// flattenMap converts a nested map into a flat map with dot notation.
+// Example: {a:{b:{c:1}}} => {a.b.c:"1"}
+// maxDepth limits the recursion depth to prevent stack overflow.
+// Non-object and non-string values are converted to strings.
+func flattenMap(m map[string]any, maxDepth int) map[string]string {
+	result := make(map[string]string)
+
+	var flatten func(prefix string, value any, depth int)
+	flatten = func(prefix string, value any, depth int) {
+		if depth > maxDepth {
+			// Convert to string if max depth reached
+			result[prefix] = fmt.Sprint(value)
+			return
+		}
+
+		if nestedMap, ok := value.(map[string]any); ok {
+			for k, v := range nestedMap {
+				newKey := k
+				if prefix != "" {
+					newKey = prefix + "." + k
+				}
+				flatten(newKey, v, depth+1)
+			}
+		} else if _, isArray := value.([]any); isArray {
+			// Ignore array values
+			return
+		} else if strVal, ok := value.(string); ok {
+			result[prefix] = strVal
+		} else {
+			// Convert non-string, non-map values to string
+			result[prefix] = fmt.Sprint(value)
+		}
+	}
+
+	flatten("", m, 0)
+
+	// Remove the empty prefix key if it exists (shouldn't in normal usage)
+	delete(result, "")
+
+	return result
 }
