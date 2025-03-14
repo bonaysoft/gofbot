@@ -9,8 +9,9 @@ import (
 type AdapterConstruct func() bot.Adapter
 
 var adapters = map[string]AdapterConstruct{
-	"telegram": NewTelegram,
 	"lark":     NewLark,
+	"telegram": NewTelegram,
+	"terminal": NewTerminal,
 }
 
 func GetAdapter(name string) (bot.Adapter, error) {
