@@ -9,7 +9,6 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/samber/lo"
 	"gopkg.in/yaml.v3"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/bonaysoft/gofbot/apis/message/v1alpha1"
@@ -39,7 +38,7 @@ func (d *DefaultManager) Match(params map[string]any) (*v1alpha1.Message, error)
 	}
 
 	matcher := func(item v1alpha1.Message) bool {
-		selector, err := metav1.LabelSelectorAsSelector(&item.Spec.Selector)
+		selector, err := NewInternalSelector(&item.Spec.Selector)
 		if err != nil {
 			return false
 		}
