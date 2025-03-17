@@ -24,6 +24,7 @@ THE SOFTWARE.
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -35,11 +36,19 @@ import (
 	"github.com/bonaysoft/gofbot/pkg/storage"
 )
 
+var debug bool
+
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
-	Use:          "template",
+	Use:          "template [TEMPLATES DIRECTORY]",
 	Short:        "Render bot templates locally and display the output.",
 	SilenceUsage: true,
+	Args:         cobra.ExactArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if debug {
+			slog.SetLogLoggerLevel(slog.LevelDebug)
+		}
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		viper.Set("storage-file-location", args[0])
 
@@ -62,6 +71,8 @@ var templateCmd = &cobra.Command{
 		}
 
 		mm := messenger.NewDefaultManager(store, adapter.GetFunMap())
+		values["chatProvider"] = adapter.Name()
+		slog.Debug("matching", slog.Any("values", values))
 		msg, err := mm.Match(values)
 		if err != nil {
 			return err
@@ -83,22 +94,20 @@ func loadValues() (map[string]any, error) {
 	valuesFile := viper.GetString("values")
 	values := make(map[string]any)
 
-	if valuesFile != "" && valuesFile != "values.yaml" {
-		// Non-default file must exist
-		if _, err := os.Stat(valuesFile); os.IsNotExist(err) {
-			return nil, fmt.Errorf("values file %q not found", valuesFile)
-		}
+	// Non-default file must exist
+	if _, err := os.Stat(valuesFile); os.IsNotExist(err) && !strings.HasPrefix(valuesFile, "values.") {
+		return nil, fmt.Errorf("values file %q not found", valuesFile)
+	}
 
-		// Read and parse the file
-		v := viper.New()
-		v.SetConfigFile(valuesFile)
-		if err := v.ReadInConfig(); err != nil {
-			return nil, fmt.Errorf("failed to read values file: %w", err)
-		}
+	// Read and parse the file
+	v := viper.New()
+	v.SetConfigFile(valuesFile)
+	if err := v.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("failed to read values file: %w", err)
+	}
 
-		if err := v.Unmarshal(&values); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal values: %w", err)
-		}
+	if err := v.Unmarshal(&values); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal values: %w", err)
 	}
 
 	// Handle command line value overrides with --set
@@ -119,6 +128,8 @@ func init() {
 
 	templateCmd.Flags().String("adapter", "terminal", "specify the adapter name")
 	templateCmd.Flags().StringArray("set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
-	templateCmd.Flags().StringP("values", "f", "values.yaml", "specify values in a YAML file or a URL (can specify multiple)")
+	templateCmd.Flags().StringP("values", "f", "values.json", "specify values in a YAML file or a URL (can specify multiple)")
+	templateCmd.Flags().BoolVar(&debug, "debug", debug, "enable verbose output")
+
 	_ = viper.BindPFlags(templateCmd.Flags())
 }

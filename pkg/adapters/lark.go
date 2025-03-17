@@ -113,20 +113,20 @@ func (l *Lark) larkEmail2OpenID(email string) string {
 	resp, err := l.client.Contact.User.BatchGetId(ctx, req)
 	if err != nil {
 		slog.Error("larkEmail2OpenID", errors.With(err))
-		return email
+		return ""
 	} else if !resp.Success() {
 		slog.Error("larkEmail2OpenID", errors.With(resp.CodeError))
-		return email
+		return ""
 	} else if len(resp.Data.UserList) == 0 {
 		slog.Error("larkEmail2OpenID", "error", fmt.Errorf("not found"))
-		return email
+		return ""
 	}
 
 	if uid := resp.Data.UserList[0].UserId; uid != nil {
 		return *uid
 	}
 
-	return email
+	return ""
 }
 
 // larkAtTransform 将一个@username文本转换为飞书的at标签
