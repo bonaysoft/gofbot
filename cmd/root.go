@@ -61,6 +61,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gofbot.yaml)")
+	rootCmd.PersistentFlags().String("adapter", "", "specify the adapter name")
+	_ = rootCmd.MarkPersistentFlagRequired("adapter")
+	_ = viper.BindPFlag("adapter", rootCmd.PersistentFlags().Lookup("adapter"))
 }
 
 // initConfig reads in config file and ENV variables if set.

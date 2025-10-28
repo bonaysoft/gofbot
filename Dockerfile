@@ -1,4 +1,4 @@
-FROM golang:1.23 as builder
+FROM golang:1.23 AS builder
 
 ARG GOPROXY
 ENV GOPROXY=$GOPROXY
@@ -16,4 +16,5 @@ RUN apt update && apt install -y openssh-client ca-certificates
 WORKDIR /app
 COPY --from=builder /app/build/bin/gofbot /app/gofbot
 COPY catalog /app/catalog
-ENTRYPOINT ["/app/gofbot", "serve"]
+ENTRYPOINT ["/app/gofbot"]
+CMD ["serve"]

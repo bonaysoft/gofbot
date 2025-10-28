@@ -126,7 +126,6 @@ func loadValues() (map[string]any, error) {
 func init() {
 	rootCmd.AddCommand(templateCmd)
 
-	templateCmd.Flags().String("adapter", "terminal", "specify the adapter name")
 	templateCmd.Flags().StringArray("set", []string{}, "set values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 	templateCmd.Flags().StringP("values", "f", "values.json", "specify values in a YAML file or a URL (can specify multiple)")
 	templateCmd.Flags().BoolVar(&debug, "debug", debug, "enable verbose output")

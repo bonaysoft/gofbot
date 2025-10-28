@@ -65,8 +65,6 @@ func init() {
 	rootCmd.AddCommand(serveCmd)
 
 	serveCmd.PersistentFlags().Int("port", 9613, "specify the port of the webhook server")
-	serveCmd.PersistentFlags().String("adapter", "", "specify the adapter name")
-	_ = serveCmd.MarkPersistentFlagRequired("adapter")
 
 	serveCmd.PersistentFlags().String("webhook-scheme", "http", "specify the scheme of the webhook URL")
 	serveCmd.PersistentFlags().String("webhook-host", "", "specify the host of the webhook URL")
