@@ -77,6 +77,7 @@ func (b *Server) makeRobotResponse(r *http.Request, chat Chat) ([]byte, error) {
 	if err := json.Unmarshal(body, &params); err != nil {
 		return nil, fmt.Errorf("decode body: %w", err)
 	}
+	b.bot.Logger.Sugar().Debugf("received body", zap.Any("params", params))
 
 	params["chatProvider"] = chat.Provider
 	msg, err := b.messenger.Match(params)
